@@ -1,0 +1,179 @@
+// ============================================================
+// NestFinder — Prisma Schema
+// Provider: SQLite (local dev). Swap to postgresql for prod.
+// Generator output: src/generated/prisma (Prisma 7 explicit path)
+// Connection URL is in prisma.config.ts, NOT here (Prisma 7 change).
+// ============================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+// SQLite stores enums as strings; Prisma handles the mapping transparently.
+
+enum Role {
+  USER
+  AGENT
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  VILLA
+  PLOT
+  COMMERCIAL
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum PropertyStatus {
+  ACTIVE
+  SOLD
+  RENTED
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role     @default(USER)
+  avatarUrl    String?
+  agencyName   String?  // populated for AGENT role
+  createdAt    DateTime @default(now())
+
+  // Relations
+  properties Property[]
+  favorites  Favorite[]
+  enquiries  Enquiry[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ─── Property ─────────────────────────────────────────────────────────────────
+
+model Property {
+  id           String         @id @default(cuid())
+  title        String
+  slug         String         @unique
+  description  String
+  propertyType PropertyType
+  listingType  ListingType
+  pricePaise   Int            // paise (1 INR = 100 paise); for RENT = monthly amount
+  bedrooms     Int
+  bathrooms    Int
+  areaSqft     Int
+  address      String
+  city         String
+  state        String
+  pincode      String
+  lat          Float
+  lng          Float
+  agentId      String
+  status       PropertyStatus @default(ACTIVE)
+  featured     Boolean        @default(false)
+  amenities    String         // comma-separated: e.g. "Parking,Gym,Pool,Security"
+  createdAt    DateTime       @default(now())
+
+  // Relations
+  agent  User            @relation(fields: [agentId], references: [id], onDelete: Restrict)
+  images PropertyImage[]
+  favorites Favorite[]
+  enquiries Enquiry[]
+
+  // ── Indexes ──────────────────────────────────────────────────
+  // Hot filter columns: frontend agents filter by city, type, listingType, status, featured, price
+  @@index([city])
+  @@index([propertyType])
+  @@index([listingType])
+  @@index([status])
+  @@index([featured])
+  @@index([pricePaise])
+  @@index([agentId])
+  @@index([createdAt])
+  // Composite indexes for the most common multi-column query patterns
+  @@index([status, city])
+  @@index([status, listingType])
+  @@index([status, propertyType])
+  @@index([status, featured])
+  @@index([city, listingType, propertyType])
+  @@map("properties")
+}
+
+// ─── PropertyImage ────────────────────────────────────────────────────────────
+
+model PropertyImage {
+  id         String @id @default(cuid())
+  propertyId String
+  url        String
+  position   Int    @default(0) // lower = primary/cover image
+
+  // Relations
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([propertyId, position])
+  @@map("property_images")
+}
+
+// ─── Favorite ─────────────────────────────────────────────────────────────────
+
+model Favorite {
+  id         String @id @default(cuid())
+  userId     String
+  propertyId String
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId]) // one row per property per user; toggle removes it
+  @@index([userId])
+  @@index([propertyId])
+  @@map("favorites")
+}
+
+// ─── Enquiry ──────────────────────────────────────────────────────────────────
+
+model Enquiry {
+  id         String        @id @default(cuid())
+  propertyId String
+  userId     String?       // nullable — guest enquiries allowed
+  name       String
+  email      String
+  phone      String
+  message    String
+  status     EnquiryStatus @default(NEW)
+  createdAt  DateTime      @default(now())
+
+  // Relations
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([userId])
+  @@index([status])
+  @@index([propertyId, status])
+  @@index([createdAt])
+  @@map("enquiries")
+}
