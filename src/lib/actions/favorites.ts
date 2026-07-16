@@ -108,7 +108,7 @@ export async function getMyFavorites(): Promise<PropertyCard[]> {
         slug: prop.slug,
         propertyType: prop.propertyType,
         listingType: prop.listingType,
-        pricePaise: prop.pricePaise,
+        pricePaise: Number(prop.pricePaise),
         bedrooms: prop.bedrooms,
         bathrooms: prop.bathrooms,
         areaSqft: prop.areaSqft,
