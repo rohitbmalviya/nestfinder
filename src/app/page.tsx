@@ -12,14 +12,14 @@ import {
 } from "@/lib/actions/properties";
 
 const CITY_IMAGES: Record<string, string> = {
-  Mumbai: "https://picsum.photos/seed/mumbai-city/600/400",
-  Bangalore: "https://picsum.photos/seed/bangalore-city/600/400",
-  Delhi: "https://picsum.photos/seed/delhi-city/600/400",
-  Pune: "https://picsum.photos/seed/pune-city/600/400",
-  Hyderabad: "https://picsum.photos/seed/hyderabad-city/600/400",
-  Chennai: "https://picsum.photos/seed/chennai-city/600/400",
-  Kolkata: "https://picsum.photos/seed/kolkata-city/600/400",
-  Ahmedabad: "https://picsum.photos/seed/ahmedabad-city/600/400",
+  Mumbai: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=80",
+  Bangalore: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=600&q=80",
+  Delhi: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&q=80",
+  Pune: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&q=80",
+  Hyderabad: "https://images.unsplash.com/photo-1605371924599-2d0365da1ae0?w=600&q=80",
+  Chennai: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&q=80",
+  Kolkata: "https://images.unsplash.com/photo-1558431382-27e303142255?w=600&q=80",
+  Ahmedabad: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=600&q=80",
 };
 
 export default async function LandingPage() {
@@ -153,7 +153,7 @@ export default async function LandingPage() {
                     <img
                       src={
                         CITY_IMAGES[city] ??
-                        `https://picsum.photos/seed/${city.toLowerCase()}/400/400`
+                        "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&q=80"
                       }
                       alt={city}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
